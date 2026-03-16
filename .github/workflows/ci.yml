@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master, develop ]
   pull_request:
-    branches: [ master, master ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -15,17 +15,20 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         build-type: [Release, Debug]
-        compiler: [gcc, clang]
-        exclude:
-          # Windows не использует gcc/clang напрямую в matrix
-          - os: windows-latest
-            compiler: gcc
-          - os: windows-latest
-            compiler: clang
         include:
+          - os: ubuntu-latest
+            compiler: gcc
+            cxx_compiler: g++
+          - os: ubuntu-latest
+            compiler: clang
+            cxx_compiler: clang++
+          - os: macos-latest
+            compiler: clang
+            cxx_compiler: clang++
           - os: windows-latest
             compiler: msvc
-            cmake-generator: "Visual Studio 17 2022"
+            cxx_compiler: cl
+            generator: "Visual Studio 17 2022"
     
     steps:
     - name: Checkout code
@@ -42,33 +45,45 @@ jobs:
       run: |
         brew install cmake
 
-    - name: Configure CMake (Unix)
+    - name: Configure CMake (Linux/macOS)
       if: runner.os != 'Windows'
       run: |
         cmake -B build \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-          -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }}
       
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
       run: |
-        cmake -B build -G "${{ matrix.cmake-generator }}"
+        cmake -B build -G "${{ matrix.generator }}"
 
-    - name: Build
-      run: cmake --build build --config ${{ matrix.build-type }}
+    - name: Build (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: cmake --build build -j$(nproc)
 
-    - name: Run Tests
+    - name: Build (Windows)
+      if: runner.os == 'Windows'
+      run: cmake --build build --config ${{ matrix.build-type }} -j$env:NUMBER_OF_PROCESSORS
+
+    - name: Run Tests (Linux/macOS)
+      if: runner.os != 'Windows'
       run: |
         cd build
         ./hash_table_demo
-      shell: bash
+
+    - name: Run Tests (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cd build
+        .\${{ matrix.build-type }}\hash_table_demo.exe
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       if: matrix.build-type == 'Release'
       with:
         name: hash_table_demo-${{ runner.os }}-${{ matrix.build-type }}
-        path: build/hash_table_demo
+        path: ${{ runner.os == 'Windows' && 'build/Release/hash_table_demo.exe' || 'build/hash_table_demo' }}
         retention-days: 7
 
   code-quality:
