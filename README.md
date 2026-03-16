@@ -1,6 +1,6 @@
 # C++ Hash Table with Custom Hash Functions
 
-[![CI/CD Pipeline](https://github.com/ignavan39/cpp-hashtable/actions/workflows/ci.yml/badge.svg)](https://github.com/ignavan39/cpp-hashtable/actions/workflows/ci.yml)
+[![CI/CD Pipeline](https://github.com/ignavan39/hastable/actions/workflows/ci.yml/badge.svg)](https://github.com/ignavan39/hastable/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
 
@@ -9,9 +9,9 @@
 
 | ОС | Release | Debug |
 |---|---|---|
-| Ubuntu | ![Ubuntu Release](https://github.com/ignavan39/cpp-hashtable/actions/workflows/ci.yml/badge.svg) | ![Ubuntu Debug](https://github.com/ignavan39/cpp-hashtable/actions/workflows/ci.yml/badge.svg) |
-| macOS | ![macOS Release](https://github.com/ignavan39/cpp-hashtable/actions/workflows/ci.yml/badge.svg) | ![macOS Debug](https://github.com/ignavan39/cpp-hashtable/actions/workflows/ci.yml/badge.svg) |
-| Windows | ![Windows Release](https://github.com/ignavan39/cpp-hashtable/actions/workflows/ci.yml/badge.svg) | ![Windows Debug](https://github.com/ignavan39/cpp-hashtable/actions/workflows/ci.yml/badge.svg) |
+| Ubuntu | ![Ubuntu Release](https://github.com/ignavan39/hastable/actions/workflows/ci.yml/badge.svg) | ![Ubuntu Debug](https://github.com/ignavan39/hastable/actions/workflows/ci.yml/badge.svg) |
+| macOS | ![macOS Release](https://github.com/ignavan39/hastable/actions/workflows/ci.yml/badge.svg) | ![macOS Debug](https://github.com/ignavan39/hastable/actions/workflows/ci.yml/badge.svg) |
+| Windows | ![Windows Release](https://github.com/ignavan39/hastable/actions/workflows/ci.yml/badge.svg) | ![Windows Debug](https://github.com/ignavan39/hastable/actions/workflows/ci.yml/badge.svg) |
 
 
 Реализация хеш-таблицы на C++ с собственными алгоритмами хеширования.
