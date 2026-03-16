@@ -1,0 +1,97 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build-type: [Release, Debug]
+        compiler: [gcc, clang]
+        exclude:
+          # Windows не использует gcc/clang напрямую в matrix
+          - os: windows-latest
+            compiler: gcc
+          - os: windows-latest
+            compiler: clang
+        include:
+          - os: windows-latest
+            compiler: msvc
+            cmake-generator: "Visual Studio 17 2022"
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install cmake
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+      
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cmake -B build -G "${{ matrix.cmake-generator }}"
+
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build-type }}
+
+    - name: Run Tests
+      run: |
+        cd build
+        ./hash_table_demo
+      shell: bash
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      if: matrix.build-type == 'Release'
+      with:
+        name: hash_table_demo-${{ runner.os }}-${{ matrix.build-type }}
+        path: build/hash_table_demo
+        retention-days: 7
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake clang-format
+
+    - name: Check code formatting
+      run: |
+        find include src -name "*.h" -o -name "*.cpp" | xargs clang-format --dry-run --Werror || true
+
+    - name: Build with sanitizers
+      run: |
+        cmake -B build-sanitize \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined"
+        cmake --build build-sanitize
+        cd build-sanitize
+        ./hash_table_demo
