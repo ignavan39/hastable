@@ -71,9 +71,7 @@ jobs:
 
     - name: Build (Windows)
       if: runner.os == 'Windows'
-      env:
-        CMAKE_BUILD_PARALLEL_LEVEL: $env:NUMBER_OF_PROCESSORS
-      run: cmake --build build --config ${{ matrix.build-type }}
+      run: cmake --build build --config ${{ matrix.build-type }} -j 4
 
     - name: Run Tests (Linux/macOS)
       if: runner.os != 'Windows'
